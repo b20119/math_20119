@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>기하 탐구실 | 원뿔곡선 인터랙티브 모델</title>
+<style>
+:root{--ink:#192d3a;--muted:#6c7d89;--teal:#137e77;--teal-light:#dff8f3;--pink:#d83f68;--gold:#e7c94f;--line:#dfe7ed;--paper:#f4f7fb}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(130deg,#edf7f6,#f4f2fb 58%,#edf3f8);font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;color:var(--ink)}
+header{margin:12px 14px 14px;padding:16px 20px;background:#fffffff0;border:1px solid #e2e9ef;border-radius:21px;box-shadow:0 8px 24px #24394b09}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.brand{font-size:20px;font-weight:850;letter-spacing:-.5px}.brand em{font-style:normal;color:var(--teal)}.sub{font-size:12px;color:var(--muted);margin-top:3px}
+nav,.btnrow{display:flex;gap:7px;flex-wrap:wrap}nav{margin-top:14px}button{font:inherit;font-weight:700;border:1px solid #d9e2e9;border-radius:11px;background:#fff;color:var(--ink);padding:9px 12px;cursor:pointer}button:hover{border-color:#80bdb5}button.active,button.primary{background:var(--teal);border-color:var(--teal);color:white}
+main{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,.82fr);gap:14px;margin:0 14px 18px}.panel{min-width:0;background:white;border:1px solid #e1e8ee;border-radius:22px;padding:15px;box-shadow:0 8px 24px #24394b08}.visuals{display:grid;grid-template-columns:1.2fr .88fr;gap:10px}.view{height:430px;position:relative;overflow:hidden;border-radius:17px;min-width:0}.scene{background:radial-gradient(ellipse at 50% 43%,#164659,#071a27 76%)}.graph{background:#fcfdff;border:1px solid #e1e8ef}.view canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}.vlabel{position:absolute;z-index:2;top:11px;left:11px;padding:7px 11px;border-radius:999px;background:#ddfff7;color:#235f5b;font-size:12px;font-weight:800;pointer-events:none}.vlabel2{top:47px}.hint{position:absolute;right:9px;bottom:9px;max-width:80%;padding:7px 9px;background:#ffffffdf;color:#3b4c58;border-radius:10px;font-size:11px;line-height:1.5;pointer-events:none}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin:12px 2px 0;font-size:12px;color:#5d6d78}.legend span{display:flex;align-items:center;gap:6px}.swatch{width:18px;height:4px;border-radius:4px}
+.side{display:flex;flex-direction:column;gap:14px}h2{font-size:17px;margin:0 0 12px;letter-spacing:-.3px}.control{padding:11px 12px;border:1px solid #e5ebf0;border-radius:15px;background:#fcfdff;margin:7px 0}.ch{display:flex;justify-content:space-between;gap:8px;font-size:14px;font-weight:750}.val{color:#8350cf;font-weight:850;white-space:nowrap}input[type=range]{width:100%;accent-color:var(--teal);margin:10px 0 3px}.small{font-size:11px;color:#7a8994;line-height:1.5}.btnrow{margin-top:10px}.btnrow button{font-size:12px;padding:8px 10px}
+.result{padding:13px;border-radius:14px;background:#effbf8;border-left:5px solid var(--teal);font-size:13px;line-height:1.7}.formula{font-family:Georgia,"Times New Roman",serif;color:#657684;font-size:14px;line-height:1.7;margin-top:9px;overflow-wrap:anywhere}.history{font-size:12px;color:#586b78;line-height:1.7;max-height:125px;overflow:auto}.history p{margin:4px 0;border-bottom:1px dashed #e1e7ed;padding:4px 0}.mission{display:none}.mission.show{display:block}.tag{display:inline-block;background:#f0e8ff;color:#7440ba;padding:3px 8px;border-radius:8px;font-size:12px;font-weight:800;margin-bottom:7px}.footer{text-align:center;color:#82909a;font-size:11px;padding:0 15px 20px}
+@media(max-width:900px){main{grid-template-columns:1fr}.view{height:360px}.side{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}}
+@media(max-width:560px){header{margin:8px;padding:13px}.brand{font-size:18px}main{margin:0 8px 12px;gap:8px}.panel{padding:10px}.visuals{grid-template-columns:1fr}.view{height:310px}.side{display:flex}.hint{max-width:86%}}
+</style>
+</head>
+<body>
+<header>
+ <div class="top"><div><div class="brand">기하 탐구실 <em>／ CONIC LAB</em></div><div class="sub">평면이 원뿔을 자를 때, 어떤 곡선이 나타날까?</div></div><div class="sub">INTERACTIVE GEOMETRY MODEL</div></div>
+ <nav><button id="freeBtn" class="active">자유 탐색</button><button id="missionBtn">미션 활동</button><button id="resetBtn">초기화</button><button id="helpBtn">도움말</button></nav>
+</header>
+<main>
+ <section class="panel">
+  <div class="visuals">
+   <div class="view scene"><span class="vlabel">이중 원뿔과 절단 평면</span><span class="vlabel vlabel2">드래그하여 자유 회전</span><canvas id="sceneCanvas"></canvas><div class="hint">드래그: 모든 방향 회전<br>휠/두 손가락: 확대·축소<br>모형의 중심축과 모선 사이 각 = 30°</div></div>
+   <div class="view graph"><span class="vlabel">절단면 안의 곡선</span><canvas id="graphCanvas"></canvas></div>
+  </div>
+  <div class="legend"><span><i class="swatch" style="background:#92a6b6"></i>이중 원뿔</span><span><i class="swatch" style="background:#58d9d4"></i>절단 평면</span><span><i class="swatch" style="background:#e34a72"></i>교선</span><span><i class="swatch" style="background:#e7c94f"></i>중심축</span></div>
+ </section>
+ <aside class="side">
+  <section class="panel">
+   <h2>절단 평면 조절</h2>
+   <div class="control"><div class="ch"><label for="height">평면의 높이 h</label><span id="hVal" class="val">1.00</span></div><input id="height" type="range" min="-2.5" max="2.5" step=".05" value="1"><div class="small">h=0이면 평면이 원뿔의 꼭짓점을 지나므로 퇴화한 곡선이 나타날 수 있습니다.</div></div>
+   <div class="control"><div class="ch"><label for="angle">평면의 기울기 θ</label><span id="aVal" class="val">0.0°</span></div><input id="angle" type="range" min="0" max="85" step=".5" value="0"><div class="small">기준은 수평면입니다. 모선과 평행해지는 경계는 θ=60°입니다.</div></div>
+   <div class="control"><div class="ch"><label for="opacity">평면 투명도</label><span id="oVal" class="val">42%</span></div><input id="opacity" type="range" min="10" max="85" step="1" value="42"></div>
+   <div class="control"><div class="ch"><label for="zoom">3D 확대·축소</label><span id="zVal" class="val">1.00×</span></div><input id="zoom" type="range" min=".55" max="1.8" step=".05" value="1"></div>
+   <div class="btnrow"><button id="circleBtn">원</button><button id="ellipseBtn">타원</button><button id="parabolaBtn">포물선</button><button id="hyperbolaBtn">쌍곡선</button></div>
+  </section>
+  <section class="panel"><h2>실시간 판정과 근거</h2><div class="result" id="result"></div><div class="formula" id="formula"></div></section>
+  <section class="panel mission" id="missionPanel"><h2>탐구 미션</h2><div class="tag" id="missionTag">MISSION 1</div><div id="missionText" style="font-size:13px;line-height:1.7"></div><div class="btnrow"><button id="checkMission" class="primary">조건 확인</button><button id="nextMission">다음 미션 →</button></div><div id="missionFeedback" class="small" style="margin-top:9px"></div></section>
+  <section class="panel"><h2>관찰 기록</h2><div class="history" id="history"><p>아직 기록이 없습니다. 평면을 조절한 뒤 ‘기록 추가’를 눌러 보세요.</p></div><div class="btnrow"><button id="recordBtn">기록 추가</button><button id="clearHistory">기록 지우기</button></div></section>
+ </aside>
+</main>
+<div class="footer">기하적 관계를 관찰하기 위한 모형입니다. 실제 곡선은 원뿔과 평면의 교선 방정식으로 계산합니다.</div>
+<script>
+(()=> {
+'use strict';
+const $=id=>document.getElementById(id);
+const scene=$('sceneCanvas'), graph=$('graphCanvas'), sctx=scene.getContext('2d'), gctx=graph.getContext('2d');
+const H=$('height'), A=$('angle'), O=$('opacity'), Z=$('zoom');
+const alpha=Math.PI/6, k=Math.tan(alpha); // 모선과 중심축 사이 각 30도
+let rotX=-0.42, rotY=-0.62, rotZ=0, dragging=false, lastX=0,lastY=0, activePointer=null, mission=0;
+const missions=[
+ {tag:'MISSION 1',text:'평면을 수평으로 두고 높이를 바꾸세요. h=0일 때와 h≠0일 때 곡선은 어떻게 다른가요?',check:()=>Math.abs(+A.value)<1&&Math.abs(+H.value)>.04,good:'맞아요. 수평면은 원을 만들며, 꼭짓점 h=0에서는 반지름이 0인 점으로 퇴화합니다.'},
+ {tag:'MISSION 2',text:'평면의 기울기를 60°에 가깝게 조절해 보세요. 어떤 경계가 나타나나요?',check:()=>Math.abs(+A.value-60)<2&&Math.abs(+H.value)>.04,good:'맞아요. 모선과 평면이 평행해지는 경계에서 포물선이 나타납니다.'},
+ {tag:'MISSION 3',text:'0°보다 크고 60°보다 작은 기울기를 찾아 닫힌 곡선을 관찰하세요.',check:()=>+A.value>2&&+A.value<58&&Math.abs(+H.value)>.04,good:'좋아요. 한쪽 원뿔만 자르는 평면은 타원형 교선을 만듭니다.'},
+ {tag:'MISSION 4',text:'기울기를 60°보다 크게 하여 두 원뿔을 모두 자르는 조건을 찾아보세요.',check:()=>+A.value>62&&Math.abs(+H.value)>.04,good:'맞아요. 두 원뿔을 자르는 평면에서는 두 갈래의 쌍곡선이 나타납니다.'}
+];
+function sizeCanvas(c,ctx){const r=c.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,2);c.width=Math.max(1,Math.round(r.width*d));c.height=Math.max(1,Math.round(r.height*d));ctx.setTransform(d,0,0,d,0,0);return {w:r.width,h:r.height};}
+function rotate(p){let [x,y,z]=p;let cz=Math.cos(rotZ),sz=Math.sin(rotZ);[x,y]=[x*cz-y*sz,x*sz+y*cz];let cx=Math.cos(rotX),sx=Math.sin(rotX);[y,z]=[y*cx-z*sx,y*sx+z*cx];let cy=Math.cos(rotY),sy=Math.sin(rotY);[x,z]=[x*cy+z*sy,-x*sy+z*cy];return [x,y,z]}
+function project(p,w,h,scale){let q=rotate(p);let perspective=4.8/(4.8-q[2]*.10);return [w/2+q[0]*scale*perspective,h/2-q[1]*scale*perspective,q[2]]}
+function seg(ctx,a,b,w,h,scale,color,width=1,dash=[]){let p=project(a,w,h,scale),q=project(b,w,h,scale);ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.stroke();ctx.setLineDash([])}
+// Plane coordinates (u,v): x=u cos(theta), y=v, z=h+u sin(theta).
+// Cone equation x²+y² = tan(30°)² z². Solve v² exactly from it.
+function curveAt(u,h,theta){const c=Math.cos(theta),s=Math.sin(theta);return k*k*(h+u*s)**2-u*u*c*c}
+function curveType(){let a=+A.value,h=+H.value;if(Math.abs(h)<.035){if(a<59.5)return {name:'점(퇴화한 원뿔곡선)',kind:'point',desc:'평면이 원뿔의 꼭짓점을 지나며, 이 기울기에서는 교선이 꼭짓점 한 점으로 퇴화합니다.',formula:'h=0, θ<60°: 교선은 꼭짓점 한 점'};if(Math.abs(a-60)<=.5)return {name:'한 직선(퇴화한 포물선)',kind:'line',desc:'꼭짓점을 지나고 모선과 평행한 경계 조건입니다.',formula:'h=0, θ=60°: 두 모선이 겹쳐 보이는 퇴화 조건'};return {name:'두 직선(퇴화한 쌍곡선)',kind:'lines',desc:'꼭짓점을 지나는 평면이 양쪽 원뿔을 가로질러 두 직선으로 퇴화합니다.',formula:'h=0, θ>60°: 교선은 두 직선'};}
+if(a<.5)return {name:'원',kind:'ellipse',desc:'평면이 중심축에 수직입니다. 높이의 절댓값이 커질수록 원의 반지름도 커집니다.',formula:'x²+y² = (h tan 30°)²'};
+if(a<59.5)return {name:'타원',kind:'ellipse',desc:'평면이 한쪽 원뿔만 자르며 닫힌 곡선이 됩니다. 높이와 기울기에 따라 장축과 단축이 변합니다.',formula:'v² = tan²30°(h+u sin θ)² − u² cos² θ'};
+if(a<=60.5)return {name:'포물선',kind:'parabola',desc:'절단 평면이 원뿔의 모선과 평행해지는 경계입니다.',formula:'v² = tan²30°(h+u sin 60°)² − u² cos² 60°'};
+return {name:'쌍곡선',kind:'hyperbola',desc:'평면이 이중 원뿔의 위쪽과 아래쪽을 모두 자르므로 두 갈래의 곡선이 나타납니다.',formula:'v² = tan²30°(h+u sin θ)² − u² cos² θ'};}
+function drawScene(){
+const {w,h}=sizeCanvas(scene,sctx);sctx.clearRect(0,0,w,h);const scale=Math.min(w,h)*.18*+Z.value;
+sctx.strokeStyle='#a7d6e015';sctx.lineWidth=1;for(let x=0;x<w;x+=35){sctx.beginPath();sctx.moveTo(x,0);sctx.lineTo(x,h);sctx.stroke()}for(let y=0;y<h;y+=35){sctx.beginPath();sctx.moveTo(0,y);sctx.lineTo(w,y);sctx.stroke()}
+// Cone axis is z; two cone nappes, half-angle 30 degrees.
+const L=3.2,N=36;
+for(let i=0;i<N;i++){let t=i*2*Math.PI/N;let pts=[];for(let j=0;j<=60;j++){let z=-L+2*L*j/60,r=Math.abs(z)*k;pts.push([r*Math.cos(t),r*Math.sin(t),z])}sctx.beginPath();pts.forEach((p,j)=>{let q=project(p,w,h,scale);if(!j)sctx.moveTo(q[0],q[1]);else sctx.lineTo(q[0],q[1])});sctx.strokeStyle=i%3===0?'#9dbdca78':'#9dbdca2b';sctx.lineWidth=i%3===0?1:.65;sctx.stroke()}
+for(let z of [-L,-L*.6,-L*.2,L*.2,L*.6,L]){let r=Math.abs(z)*k;sctx.beginPath();for(let j=0;j<=100;j++){let t=j*Math.PI*2/100,q=project([r*Math.cos(t),r*Math.sin(t),z],w,h,scale);if(!j)sctx.moveTo(q[0],q[1]);else sctx.lineTo(q[0],q[1])}sctx.strokeStyle='#9dbdca30';sctx.lineWidth=.8;sctx.stroke()}
+seg(sctx,[0,0,-L],[0,0,L],w,h,scale,'#f0d65cbd',1.4,[5,5]);
+// Plane as a parallelogram in the x-z tilt direction, spanning y.
+const theta=+A.value*Math.PI/180, hh=+H.value, ex=2.8, ey=2.6,c=Math.cos(theta),s=Math.sin(theta);
+const plane=[[-ex*c,-ey,hh-ex*s],[ex*c,-ey,hh+ex*s],[ex*c,ey,hh+ex*s],[-ex*c,ey,hh-ex*s]];
+sctx.beginPath();plane.forEach((p,i)=>{let q=project(p,w,h,scale);if(!i)sctx.moveTo(q[0],q[1]);else sctx.lineTo(q[0],q[1])});sctx.closePath();sctx.fillStyle=`rgba(70,215,210,${(+O.value/100)*.36})`;sctx.fill();sctx.strokeStyle='#75e6dfb5';sctx.lineWidth=1.1;sctx.stroke();
+// Draw true intersection, in the plane's own (u,v) coordinates.
+const type=curveType(), drawBranch=(sign,umin,umax)=>{const n=900;sctx.beginPath();let started=false;for(let i=0;i<=n;i++){let u=umin+(umax-umin)*i/n,rad=curveAt(u,hh,theta);if(rad < -1e-7){started=false;continue}let v=sign*Math.sqrt(Math.max(0,rad));let p=[u*c,v,hh+u*s],q=project(p,w,h,scale);if(!started){sctx.moveTo(q[0],q[1]);started=true}else sctx.lineTo(q[0],q[1])}sctx.strokeStyle='#f04b75';sctx.lineWidth=2.5;sctx.stroke()};
+if(type.kind==='point'||type.kind==='line'||type.kind==='lines'){
+ if(type.kind==='point'){let q=project([0,0,hh],w,h,scale);sctx.beginPath();sctx.arc(q[0],q[1],4,0,Math.PI*2);sctx.fillStyle='#ff5c80';sctx.fill()}
+ else if(type.kind==='lines'){// through the vertex, solve v = +/-u*sqrt(k²sin²θ-cos²θ)
+ const m=Math.sqrt(Math.max(0,k*k*s*s-c*c));for(let sg of [-1,1]){let pts=[-2.8,2.8];seg(sctx,[-2.8*c,sg*(-2.8*m),hh-2.8*s],[2.8*c,sg*(2.8*m),hh+2.8*s],w,h,scale,'#f04b75',2.4)}}
+ else {seg(sctx,[-2*c,0,hh-2*s],[2*c,0,hh+2*s],w,h,scale,'#f04b75',2.4)}
+}else{
+ // Broad parameter window; invalid radicand portions are skipped. Ellipses close at their exact roots.
+ let maxU=6.5;
+ if(type.kind==='ellipse'){let den=c*c-k*k*s*s,root=Math.sqrt(Math.max(1e-9,den));let center=k*k*hh*s/(den),radius=Math.abs(k*hh*c)/(den);maxU=Math.min(30,Math.abs(center)+Math.max(radius,0.04)+.05);drawBranch(1,center-radius-.03,center+radius+.03);drawBranch(-1,center-radius-.03,center+radius+.03)}
+ else {drawBranch(1,-maxU,maxU);drawBranch(-1,-maxU,maxU)}
+}
+let origin=project([0,0,0],w,h,scale);sctx.beginPath();sctx.arc(origin[0],origin[1],2.5,0,Math.PI*2);sctx.fillStyle='#fff';sctx.fill();
+}
+function getGraphBounds(type,h,theta){
+if(type.kind==='point')return {xmin:-1,xmax:1,ymin:-1,ymax:1};
+if(type.kind==='ellipse'){let den=Math.max(1e-8,Math.cos(theta)**2-k*k*Math.sin(theta)**2),u0=k*k*h*Math.sin(theta)/den,ru=Math.abs(k*h*Math.cos(theta))/den;let rv=Math.max(.04,Math.sqrt(Math.max(0,k*k*(h+u0*Math.sin(theta))**2-u0*u0*Math.cos(theta)**2)));return {xmin:u0-ru-.1,xmax:u0+ru+.1,ymin:-rv-.1,ymax:rv+.1}}
+if(type.kind==='parabola'){let r=Math.max(.8,Math.abs(h)*2.8);return {xmin:-r,xmax:r,ymin:-Math.max(1,Math.abs(h)*1.8),ymax:Math.max(1,Math.abs(h)*1.8)}}
+let r=Math.max(2.6,Math.abs(h)*2.4);return {xmin:-r,xmax:r,ymin:-r,ymax:r}
+}
+function drawGraph(){
+const {w,h}=sizeCanvas(graph,gctx);gctx.clearRect(0,0,w,h);gctx.fillStyle='#fcfdff';gctx.fillRect(0,0,w,h);const theta=+A.value*Math.PI/180,hh=+H.value,type=curveType(),b=getGraphBounds(type,hh,theta);let pad=24, sx=(w-2*pad)/(b.xmax-b.xmin),sy=(h-2*pad)/(b.ymax-b.ymin),scale=Math.min(sx,sy);const cx=w/2,cy=h/2;
+const X=u=>cx+u*scale,Y=v=>cy-v*scale;
+gctx.strokeStyle='#e7edf2';gctx.lineWidth=1;for(let x=cx%Math.max(16,scale);x<w;x+=Math.max(16,scale)){gctx.beginPath();gctx.moveTo(x,0);gctx.lineTo(x,h);gctx.stroke()}for(let y=cy%Math.max(16,scale);y<h;y+=Math.max(16,scale)){gctx.beginPath();gctx.moveTo(0,y);gctx.lineTo(w,y);gctx.stroke()}
+gctx.strokeStyle='#8796a1';gctx.lineWidth=1.1;gctx.beginPath();gctx.moveTo(12,cy);gctx.lineTo(w-12,cy);gctx.moveTo(cx,12);gctx.lineTo(cx,h-12);gctx.stroke();
+gctx.strokeStyle='#d83f68';gctx.lineWidth=2.5;gctx.beginPath();
+function branch(sign,umin,umax){let started=false;const n=1000;for(let i=0;i<=n;i++){let u=umin+(umax-umin)*i/n,rad=curveAt(u,hh,theta);if(rad < -1e-8){started=false;continue}let v=sign*Math.sqrt(Math.max(0,rad));let px=X(u),py=Y(v);if(!Number.isFinite(px+py)){started=false;continue}if(!started){gctx.moveTo(px,py);started=true}else gctx.lineTo(px,py)}}
+if(type.kind==='point'){gctx.moveTo(cx+4,cy);gctx.arc(cx,cy,4,0,2*Math.PI)}
+else if(type.kind==='lines'){const m=Math.sqrt(Math.max(0,k*k*Math.sin(theta)**2-Math.cos(theta)**2));for(let sg of [-1,1]){gctx.moveTo(X(b.xmin),Y(sg*m*b.xmin));gctx.lineTo(X(b.xmax),Y(sg*m*b.xmax))}}
+else if(type.kind==='line'){gctx.moveTo(X(b.xmin),Y(0));gctx.lineTo(X(b.xmax),Y(0))}
+else if(type.kind==='ellipse'){const den=Math.max(1e-8,Math.cos(theta)**2-k*k*Math.sin(theta)**2),u0=k*k*hh*Math.sin(theta)/den,ru=Math.abs(k*hh*Math.cos(theta))/den;branch(1,u0-ru,u0+ru);branch(-1,u0-ru,u0+ru)}
+else {branch(1,b.xmin,b.xmax);branch(-1,b.xmin,b.xmax)}
+gctx.stroke();gctx.fillStyle='#71808c';gctx.font='11px system-ui';gctx.fillText('절단면 좌표 (u, v)',10,h-10);
+}
+function update(){ $('hVal').textContent=(+H.value).toFixed(2);$('aVal').textContent=(+A.value).toFixed(1)+'°';$('oVal').textContent=O.value+'%';$('zVal').textContent=(+Z.value).toFixed(2)+'×';const t=curveType();$('result').innerHTML='<b>'+t.name+'</b><br>'+t.desc;$('formula').textContent=t.formula+' · 모선과 중심축 사이 각은 30°';drawScene();drawGraph()}
+[H,A,O,Z].forEach(el=>el.addEventListener('input',update));
+function preset(t){if(t==='원'){H.value=1.25;A.value=0}else if(t==='타원'){H.value=1;A.value=30}else if(t==='포물선'){H.value=1;A.value=60}else{H.value=1;A.value=72}update()}
+$('circleBtn').onclick=()=>preset('원');$('ellipseBtn').onclick=()=>preset('타원');$('parabolaBtn').onclick=()=>preset('포물선');$('hyperbolaBtn').onclick=()=>preset('쌍곡선');
+$('resetBtn').onclick=()=>{H.value=1;A.value=0;O.value=42;Z.value=1;rotX=-.42;rotY=-.62;rotZ=0;update()};
+$('freeBtn').onclick=()=>{$('freeBtn').classList.add('active');$('missionBtn').classList.remove('active');$('missionPanel').classList.remove('show')};
+$('missionBtn').onclick=()=>{$('missionBtn').classList.add('active');$('freeBtn').classList.remove('active');$('missionPanel').classList.add('show');showMission()};
+function showMission(){let m=missions[mission%missions.length];$('missionTag').textContent=m.tag;$('missionText').textContent=m.text;$('missionFeedback').textContent=''}
+$('checkMission').onclick=()=>{$('missionFeedback').textContent=missions[mission%missions.length].check()?missions[mission%missions.length].good:'아직 조건에 가까워지지 않았어요. 슬라이더를 조절해 다시 관찰해 보세요.'};
+$('nextMission').onclick=()=>{mission=(mission+1)%missions.length;showMission()};
+$('helpBtn').onclick=()=>alert('사용법\\n• 모형을 마우스 또는 손가락으로 드래그하면 모든 방향으로 회전합니다.\\n• 휠 또는 두 손가락 제스처로 확대·축소할 수 있습니다.\\n• 높이와 기울기를 조절하면 교선과 2D 그래프가 함께 바뀝니다.\\n• 모선과 중심축 사이 각은 30°이며, 평면의 모선 평행 조건은 60°입니다.');
+$('recordBtn').onclick=()=>{let t=curveType(),p=document.createElement('p');p.textContent='h='(+H.value).toFixed(2)+', θ='(+A.value).toFixed(1)+'° → '+t.name;let box=$('history');if(box.firstElementChild&&box.firstElementChild.textContent.includes('아직 기록'))box.innerHTML='';box.prepend(p)};
+$('clearHistory').onclick=()=>{$('history').innerHTML='<p>아직 기록이 없습니다. 평면을 조절한 뒤 ‘기록 추가’를 눌러 보세요.</p>'};
+// Free orbit controls: pointer drag changes yaw and pitch; wheel changes zoom.
+scene.addEventListener('pointerdown',e=>{dragging=true;activePointer=e.pointerId;lastX=e.clientX;lastY=e.clientY;scene.setPointerCapture(e.pointerId)});
+scene.addEventListener('pointermove',e=>{if(!dragging||e.pointerId!==activePointer)return;const dx=e.clientX-lastX,dy=e.clientY-lastY;rotY+=dx*.009;rotX+=dy*.009;rotX=Math.max(-Math.PI*.49,Math.min(Math.PI*.49,rotX));lastX=e.clientX;lastY=e.clientY;drawScene()});
+function stopDrag(e){if(e.pointerId===activePointer){dragging=false;activePointer=null}}
+scene.addEventListener('pointerup',stopDrag);scene.addEventListener('pointercancel',stopDrag);
+scene.addEventListener('wheel',e=>{e.preventDefault();Z.value=Math.max(.55,Math.min(1.8,+Z.value+(e.deltaY<0?.05:-.05)));update()},{passive:false});
+window.addEventListener('resize',update);update();
+})();
+</script>
+</body>
+</html>
